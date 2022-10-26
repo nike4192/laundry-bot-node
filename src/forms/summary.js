@@ -1,7 +1,7 @@
 
 const { isEqual } = require('date-fns');
 const { Op } = require('sequelize');
-const misc = require("../misc");
+const misc = require("../misc.js");
 const { Markup } = require("telegraf");
 const { BaseAction, BaseMessage, BaseForm } = require('./base.js');
 const { User, SummaryData, Appointment, AppointmentData } = require('../models.js');
@@ -72,10 +72,10 @@ class SummaryInfoMessage extends BaseMessage {
         }
 
         msgText += [
-          misc.format('\\- @{}', misc.md2Escape(user.username)),
+          misc.format('\\- @{}', misc.md2Escape(user.username || '')),
           misc.format('||{} {}||',
-            misc.md2Escape(user.first_name),
-            misc.md2Escape(user.last_name)),
+            misc.md2Escape(user.first_name || ''),
+            misc.md2Escape(user.last_name || '')),
           misc.format('\\({}\\)\n', misc.washersToStr(washers))
         ].join(' \\- ');
       }
@@ -99,6 +99,7 @@ class SummaryForm extends BaseForm {
     return await SummaryData.findAll({
       where: {
         id: {[Op.ne]: this.data.id},
+        user_id: this.data.user_id,
         summary_date: this.data.summary_date
       }
     });
