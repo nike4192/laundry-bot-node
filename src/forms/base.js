@@ -113,7 +113,7 @@ class BaseForm {
   }
 
   async buttonHandler(ctx, state, value) {
-    this.data.state = state;
+    this.data.state = parseInt(state);
     let [result, errorText] = await this.activeAction.buttonHandler(this.user, this.data, value);
     if (result) {
       if (this.data.state < this.actions.length - 1) {
@@ -180,7 +180,7 @@ class BaseForm {
     });
   }
 
-  async updateMessage(ctx) {
+  async updateMessage(ctx, withoutAllocate = false) {
     try {
       let cb = async () => {
         await ctx.telegram.editMessageText(
@@ -192,7 +192,7 @@ class BaseForm {
             ...(await this.replyMarkup())
           });
       }
-      if (this.finished) {
+      if (this.finished || withoutAllocate) {
         await cb();
       } else {
         await this.allocateDataIfNecessary(ctx, cb)

@@ -189,8 +189,9 @@ class WashersAppointmentAction extends BaseAction {
     if (slot.available) {
       if (slot.reason === constants.WASHER_IS_AVAILABLE) {
         let plannedAppointments = await Appointment.findPlanned(user);
-        if (plannedAppointments.length >= constants.max_book_washers) {
-          let errorText = misc.format(locale['max_book_washers'], constants.max_book_washers);
+        let maxBookWashers = constants.max_book_washers[user.role];
+        if (plannedAppointments.length >= maxBookWashers) {
+          let errorText = misc.format(locale['max_book_washers'], maxBookWashers);
           return [false, errorText];
         }
         await Appointment.create({
@@ -288,8 +289,9 @@ class AppointmentForm extends BaseForm {
       ]
     });
 
+    console.log('AppointmentData takeAffect: ', dataArray.length);
     await Promise.all(dataArray.map(d => {
-      new AppointmentForm(d.user, d).updateMessage(ctx);
+      new AppointmentForm(d.user, d).updateMessage(ctx, true);
     }));
 
     let summaryDataArray = await SummaryData.findAll({
@@ -306,8 +308,9 @@ class AppointmentForm extends BaseForm {
       },
       include: [User]
     });
+    console.log('SummaryData takeAffect: ', summaryDataArray.length);
     await Promise.all(summaryDataArray.map(d => {
-      new SummaryForm(d.user, d).updateMessage(ctx);
+      new SummaryForm(d.user, d).updateMessage(ctx, true);
     }));
   }
 

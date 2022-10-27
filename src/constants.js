@@ -3,7 +3,11 @@ const ms = require('ms');
 
 const error_visible_duration = 2 // In seconds
 const book_time_left = 0.5 // In hours (I don't know how it is in English)
-const max_book_washers = 2
+const max_book_washers = {
+  user: 2,
+  moderator: 4,
+  employee: 4
+}
 const available_days = {  // Showed buttons in washer select
   user: 5,
   moderator: 7,

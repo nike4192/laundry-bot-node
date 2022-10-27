@@ -44,7 +44,10 @@ async function cronUpdate(now) {
       });
       if (appointmentsCount) {
         let summaryDataArray = await SummaryData.findAll({
-          where: {summary_date: bookDate},
+          where: {
+            user_id: moderator.id,
+            summary_date: bookDate
+          },
           include: {
             model: User
           }

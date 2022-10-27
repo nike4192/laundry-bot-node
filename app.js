@@ -49,15 +49,16 @@ const bot = new Telegraf(process.env.BOT_TOKEN, {
   contextType: CustomContext
 });
 
+const sessionData = {};
+
 function session() {
-  let usersData = {};
   return async function (ctx, next) {
     if (!ctx.session) {
       let fromId = ctx.from.id;
-      if (!usersData[fromId]) {
-        usersData[fromId] = {};
+      if (!sessionData[fromId]) {
+        sessionData[fromId] = {};
       }
-      ctx.session = usersData[fromId];
+      ctx.session = sessionData[fromId];
     }
     await next();
   }
@@ -87,7 +88,6 @@ async function isAuthorizedUser(ctx) {
 async function main(processes) {
 
   await loadRedis();
-
   let sequelize = await loadSequelize();
 
   bot.use(session());
@@ -314,6 +314,18 @@ async function main(processes) {
       }
     });
 
+  let redis = getRedis();
+
+  let subscriber = redis.duplicate();
+  await subscriber.connect();
+
+  await subscriber.subscribe('updateUser', async (message) => {
+    let chatId = message;
+    if (sessionData[chatId]?.authUser) {
+      await sessionData[chatId].authUser.reload();
+    }
+  });
+
   if (process.env.NODE_ENV === 'test') {
     await bot.launch();
   } else if (process.env.WEBHOOK_URL) {
@@ -321,6 +333,12 @@ async function main(processes) {
     await bot.telegram.setWebhook(process.env.WEBHOOK_URL);
     console.log('Webhook was set:', process.env.WEBHOOK_URL);
   }
+
+  bot.catch(async err => {
+    let adminBot = new Telegraf(process.env.ADMIN_BOT_TOKEN);
+    await adminBot.telegram.sendMessage(process.env.ADMIN_CHAT_ID, err.stack);
+    throw err;
+  });
 
   // https://github.com/sequelize/sequelize/issues/7801#issuecomment-309708889
   let events = [
@@ -350,8 +368,11 @@ async function subscribe() {
   await loadRedis();
   await loadSequelize();
 
-  let client = getRedis();
-  await client.subscribe('close', async (message) => {
+  let redis = getRedis();
+  let subscriber = redis.duplicate();
+  await subscriber.connect();
+
+  await subscriber.subscribe('close', async (message) => {
     let [chatId, messageId] = message.split(/:/);
     await bot.telegram.editMessageText(
       parseInt(chatId),
@@ -360,7 +381,7 @@ async function subscribe() {
       '⌛');
   });
 
-  await client.subscribe('takeAffect', async (message) => {
+  await subscriber.subscribe('takeAffect', async (message) => {
     let [userId, messageId] = message.split(/:/);
     let data = await AppointmentData.findOne({
       where: {
