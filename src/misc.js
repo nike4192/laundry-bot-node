@@ -12,18 +12,35 @@ function getLocale(...args) {
   return l;
 }
 
+function getAppointmentNote(actionName, data) {
+  let actionNote = constants.appointment_form_action_notes[actionName];
+  if (actionNote) {
+    switch(actionName) {
+      case 'time':
+        let weekday = data.book_date.getDay();
+        if (actionNote[weekday]) {
+          let bookTime = timeToStr(data.book_time);
+          return actionNote[weekday][bookTime];
+        }
+        break;
+    }
+  }
+}
+
 function getAvailableDates(userRole) {
   let now = new Date();
   let d = new Date(now).setHours(0, 0, 0, 0).valueOf();
   let td = ms('1d');
 
-  let availableWeekdays = constants.available_weekdays[userRole];
-  let isNotAvailableTimes = constants.available_time.every(t => now.valueOf() > d + t);
+  let weekday = now.getDay();
+  let available_times = constants.available_weekday_times[weekday];
+  let isNotAvailableTimes = available_times.every(t => now.valueOf() > d + t);
   if (isNotAvailableTimes) {
     d += td;
   }
   let dates = [];
   let availableDays = constants.available_days[userRole];
+  let availableWeekdays = constants.available_weekdays[userRole];
   for (let i = 0; i < availableDays; i++) {
     while (!availableWeekdays.includes(new Date(d).getDay())) {
       d += td;
@@ -246,6 +263,7 @@ function expandSlots(at, user, appointments, d, times, washers) {
 module.exports = {
   aggregateAppointmentSlots,
   getAvailableDates,
+  getAppointmentNote,
   dateButtonToStr,
   AppointmentSlot,
   ActionResult,

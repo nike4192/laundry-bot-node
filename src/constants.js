@@ -5,8 +5,8 @@ const error_visible_duration = 2 // In seconds
 const book_time_left = 0.5 // In hours (I don't know how it is in English)
 const max_book_washers = {
   user: 2,
-  moderator: 4,
-  employee: 4
+  moderator: 3,
+  employee: 3
 }
 const available_days = {  // Showed buttons in washer select
   user: 5,
@@ -24,16 +24,47 @@ const reminder_timedelta = [
 
 const available_weekdays = {
   user:      [1, 2, 4, 5, 6],    // Mon, Tue, Thu, Fri, Sat
-  moderator: [1, 2, 3, 4, 5, 6, 0], // Mon, Tue, Wed, Thu, Fri, Sat
-  employee:  [1, 2, 3, 4, 5, 6, 0]  // Mon, Tue, Wed, Thu, Fri, Sat
+  moderator: [1, 2, 3, 4, 5, 6, 0], // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+  employee:  [1, 2, 3, 4, 5, 6, 0]  // Mon, Tue, Wed, Thu, Fri, Sat, Sun
 }
 
-const available_time = [
+const user_available_times = [
   ms('10h'),
   ms('14h'),
   ms('18h'),
   ms('20h')
 ]
+
+const moderator_available_times = [
+  ms('10h'),
+  ms('13h'),
+  ms('16h'),
+  ms('19h'),
+  ms('22h')
+]
+
+const available_weekday_times = {
+  1: user_available_times,       // Monday
+  2: user_available_times,       // Tuesday
+  3: moderator_available_times,  // Wednesday
+  4: user_available_times,       // Thursday
+  5: user_available_times,       // Friday
+  6: user_available_times,       // Saturday
+  0: moderator_available_times   // Sunday
+}
+
+const appointment_time_action_note = {
+  '10:00': () => {
+    return 'забрать следует в 12:00';
+  }
+}
+
+const appointment_form_action_notes = {
+  'time': {
+    3: appointment_time_action_note,  // Wed
+    0: appointment_time_action_note  // Sun
+  }
+}
 
 const SELF_ALREADY_AUTHORIZED = 0;
 const OTHER_ALREADY_AUTHORIZED = 1;
@@ -77,7 +108,8 @@ module.exports = {
   available_days,
   reminder_timedelta,
   available_weekdays,
-  available_time,
+  available_weekday_times,
+  appointment_form_action_notes,
   SELF_ALREADY_AUTHORIZED,
   OTHER_ALREADY_AUTHORIZED,
   AUTH_SUCCESSFUL,

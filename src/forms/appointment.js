@@ -13,12 +13,18 @@ const {hoursToMilliseconds} = require("date-fns");
 
 
 class DateAppointmentAction extends BaseAction {
+
+  actionName = 'date'
+
   constructor() {
     super('Дата', 'Выберите дату');
   }
 
   async isAvailableSlot(user, data, value) {
-    let times = constants.available_time.map(t => {
+    let book_date = misc.date.parse(value);
+    let weekday = book_date.getDay();
+    let available_times = constants.available_weekday_times[weekday];
+    let times = available_times.map(t => {
       let d = new Date();
       d.setHours(0, 0, 0, t);
       return misc.time.stringify(d);
@@ -26,7 +32,7 @@ class DateAppointmentAction extends BaseAction {
 
     let appointments = await Appointment.findAll({
       where: {
-        book_date: misc.date.parse(value),
+        book_date,
         book_time: {
           [Op.in]: times
         }
@@ -55,7 +61,11 @@ class DateAppointmentAction extends BaseAction {
   }
 
   itemStringify(data) {
-    return misc.dateToStr(data.book_date);
+    let actionNote = misc.getAppointmentNote(this.actionName, data);
+    let bookDate = misc.dateToStr(data.book_date);
+    return actionNote
+      ? misc.format('{} ({})', bookDate, actionNote(data))
+      : bookDate;
   }
 
   async buttonHandler(user, data, value) {
@@ -72,6 +82,9 @@ class DateAppointmentAction extends BaseAction {
 }
 
 class TimeAppointmentAction extends BaseAction {
+
+  actionName = 'time'
+
   constructor() {
     super('Время', 'Выберите время');
   }
@@ -93,7 +106,9 @@ class TimeAppointmentAction extends BaseAction {
     let now = new Date();
 
     let keyboard = [];
-    for (let t of constants.available_time) {
+    let weekday = data.book_date.getDay();
+    let available_times = constants.available_weekday_times[weekday];
+    for (let t of available_times) {
       if (now.valueOf() < data.book_date.valueOf() + t) {
         let d = new Date();
         d.setHours(0, 0, 0, t);
@@ -127,11 +142,18 @@ class TimeAppointmentAction extends BaseAction {
   }
 
   itemStringify(data) {
-    return misc.timeToStr(data.book_time);
+    let actionNote = misc.getAppointmentNote(this.actionName, data);
+    let bookTime = misc.timeToStr(data.book_time);
+    return actionNote
+      ? misc.format('{} ({})', bookTime, actionNote(data))
+      : bookTime;
   }
 }
 
 class WashersAppointmentAction extends BaseAction {
+
+  actionName = 'washers'
+
   constructor() {
     super('Стиральные машины', 'Выберите стиральные машины');
   }
@@ -175,11 +197,13 @@ class WashersAppointmentAction extends BaseAction {
   }
 
   itemStringify(data) {
-    if (data.appointments && data.appointments.length) {
-      return misc.washersToStr(data.appointments.map(a => a.washer));
-    } else {
-      return '...';
-    }
+    let actionNote = misc.getAppointmentNote(this.actionName, data);
+    let washers = data.appointments && data.appointments.length
+      ? misc.washersToStr(data.appointments.map(a => a.washer))
+      : '...';
+    return actionNote
+      ? misc.format('{} ({})', washers, actionNote(data))
+      : washers;
   }
 
   async buttonHandler(user, data, value) {

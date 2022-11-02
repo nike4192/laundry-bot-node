@@ -73,9 +73,8 @@ class SummaryInfoMessage extends BaseMessage {
 
         msgText += [
           misc.format('\\- @{}', misc.md2Escape(user.username || '')),
-          misc.format('||{} {}||',
-            misc.md2Escape(user.first_name || ''),
-            misc.md2Escape(user.last_name || '')),
+          misc.format('||{}||',
+            misc.md2Escape(user.first_name || '')),
           misc.format('\\({}\\)\n', misc.washersToStr(washers))
         ].join(' \\- ');
       }
