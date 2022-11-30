@@ -108,6 +108,7 @@ async function cronUpdate(now) {
       for (let reminder of user.reminders) {
         let notifyDate = bookDate - reminder.seconds * 1000;
         if (isEqual(nowDate, notifyDate)) {
+          console.log(now, 'Sending message', user.chat_id, appointmentData.id);
           let message = bot.telegram.sendMessage(
             user.chat_id,
             misc.format(
