@@ -91,35 +91,37 @@ async function cronUpdate(now) {
   for (let appointmentData of appointmentDataArray) {
     let bookDate = appointmentData.book_datetime;
     if (nowDate >= bookDate - hoursToMilliseconds(constants.book_time_left)) {
-      let closeReason;
+      let closeReason = null;
       if (nowDate >= bookDate) {
         closeReason = constants.APPOINTMENT_IS_PASSED;  // PASSED
       } else {
-        closeReason = constants.APPOINTMENT_IS_RESERVED;  // RESERVED
-        if (appointmentData.reserved) continue;  // NOT MODIFY MESSAGE
-        await appointmentData.update({ reserved: true });
-      }
-      console.log('Closed data', appointmentData.id, closeReason);
-      let expiredForm = new AppointmentForm(appointmentData.user, appointmentData)
-        .close(closeReason, bot.telegram);
-      expiredForms.push(expiredForm);
-    } else {
-      let user = appointmentData.user;
-      for (let reminder of user.reminders) {
-        let notifyDate = bookDate - reminder.seconds * 1000;
-        if (isEqual(nowDate, notifyDate)) {
-          console.log(now, 'Sending message', user.chat_id, appointmentData.id);
-          let message = bot.telegram.sendMessage(
-            user.chat_id,
-            misc.format(
-              '🔔 Через *{}* назначена ваша стирка',
-              misc.timedelta.stringify(reminder.seconds * 1000)), {
-              parse_mode: 'Markdown',
-              reply_to_message_id: appointmentData.message_id
-            }
-          );
-          sendingMessages.push(message);
+        if (!appointmentData.reserved) {
+          closeReason = constants.APPOINTMENT_IS_RESERVED;  // RESERVED
+          await appointmentData.update({ reserved: true });
         }
+      }
+      if (closeReason) {
+        console.log('Closed data', appointmentData.id, closeReason);
+        let expiredForm = new AppointmentForm(appointmentData.user, appointmentData)
+          .close(closeReason, bot.telegram);
+        expiredForms.push(expiredForm);
+      }
+    }
+    let user = appointmentData.user;
+    for (let reminder of user.reminders) {
+      let notifyDate = bookDate - reminder.seconds * 1000;
+      if (isEqual(nowDate, notifyDate)) {
+        console.log(now, 'Sending message', user.chat_id, appointmentData.id);
+        let message = bot.telegram.sendMessage(
+          user.chat_id,
+          misc.format(
+            '🔔 Через *{}* назначена ваша стирка',
+            misc.timedelta.stringify(reminder.seconds * 1000)), {
+            parse_mode: 'Markdown',
+            reply_to_message_id: appointmentData.message_id
+          }
+        );
+        sendingMessages.push(message);
       }
     }
   }
