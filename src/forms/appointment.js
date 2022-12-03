@@ -7,9 +7,10 @@ const { BaseAction, BaseForm } = require('./base');
 const misc = require('../misc');
 const constants = require("../constants.js");
 const locales = require('../../locales/index.js');
+const { UserAttrs } = constants;
 const { expandSlots, getLocale, AppointmentSlot} = require("../misc");
 const { SummaryForm } = require('./summary.js');
-const {hoursToMilliseconds} = require("date-fns");
+const { hoursToMilliseconds } = require("date-fns");
 
 
 class DateAppointmentAction extends BaseAction {
@@ -213,7 +214,7 @@ class WashersAppointmentAction extends BaseAction {
     if (slot.available) {
       if (slot.reason === constants.WASHER_IS_AVAILABLE) {
         let plannedAppointments = await Appointment.findPlanned(user);
-        let maxBookWashers = constants.max_book_washers[user.role];
+        let maxBookWashers = UserAttrs[user.role].max_book_washers;
         if (plannedAppointments.length >= maxBookWashers) {
           let errorText = misc.format(locale['max_book_washers'], maxBookWashers);
           return [false, errorText];

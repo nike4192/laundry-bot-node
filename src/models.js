@@ -1,7 +1,7 @@
 
 const { Sequelize, Model, DataTypes, Op } = require('sequelize');
 const misc = require('./misc.js');
-const UserRoles = DataTypes.ENUM('user', 'moderator', 'employee');
+const { UserRole } = require("./constants");
 
 class User extends Model {}
 class Message extends Model {}
@@ -68,7 +68,7 @@ async function initModels(sequelize) {
       allowNull: true
     },
     role: {
-      type: UserRoles,
+      type: DataTypes.ENUM(...Object.values(UserRole)),
       allowNull: false
     }
   }, {
@@ -322,7 +322,7 @@ async function initModels(sequelize) {
 
 module.exports = {
   initModels,
-  UserRoles, User, Message,
+  User, Message,
   Appointment, AppointmentData,
   Reminder, ReminderData,
   SummaryData,

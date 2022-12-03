@@ -3,15 +3,31 @@ const ms = require('ms');
 
 const error_visible_duration = 2 // In seconds
 const book_time_left = 0.5 // In hours (I don't know how it is in English)
-const max_book_washers = {
-  user: 2,
-  moderator: 3,
-  employee: 3
+
+const UserRole = {
+  user: "user",
+  "moderator:partial": "moderator:partial",
+  moderator: "moderator",
+  employee: "employee"
 }
-const available_days = {  // Showed buttons in washer select
-  user: 5,
-  moderator: 7,
-  employee: 7
+
+const UserAttrs = {
+  [UserRole.user]: {
+    max_book_washers: 2,
+    available_weekdays: [1, 2, 4, 5, 6],    // Mon, Tue, Thu, Fri, Sat
+  },
+  [UserRole["moderator:partial"]]: {
+    max_book_washers: 2,
+    available_weekdays: [1, 2, 4, 5, 6],    // Mon, Tue, Thu, Fri, Sat
+  },
+  [UserRole.moderator]: {
+    max_book_washers: 3,
+    available_weekdays: [1, 2, 3, 4, 5, 6, 0], // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+  },
+  [UserRole.employee]: {
+    max_book_washers: 3,
+    available_weekdays: [1, 2, 3, 4, 5, 6, 0], // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+  }
 }
 
 const reminder_timedelta = [
@@ -21,12 +37,6 @@ const reminder_timedelta = [
   ms('3h'),
   ms('1d')
 ]
-
-const available_weekdays = {
-  user:      [1, 2, 4, 5, 6],    // Mon, Tue, Thu, Fri, Sat
-  moderator: [1, 2, 3, 4, 5, 6, 0], // Mon, Tue, Wed, Thu, Fri, Sat, Sun
-  employee:  [1, 2, 3, 4, 5, 6, 0]  // Mon, Tue, Wed, Thu, Fri, Sat, Sun
-}
 
 const user_available_times = [
   ms('10h'),
@@ -102,12 +112,11 @@ const WASHER_SIGN_CHARS = {  // not_available, available
 }
 
 module.exports = {
+  UserRole,
+  UserAttrs,
   error_visible_duration,
   book_time_left,
-  max_book_washers,
-  available_days,
   reminder_timedelta,
-  available_weekdays,
   available_weekday_times,
   appointment_form_action_notes,
   SELF_ALREADY_AUTHORIZED,

@@ -29,6 +29,7 @@ const { Telegraf, Context } = require('telegraf');
 const { getLocale } = require("./src/misc");
 const { Sequelize, Op } = require("sequelize");
 const { loadRedis, getRedis } = require("./src/redis");
+const {UserAttrs} = require("./src/constants");
 
 
 class CustomContext extends Context {
@@ -240,7 +241,7 @@ async function main(processes) {
 
   bot.command('summary',
     authUserMiddleware,
-    userPermissionMiddleware('moderator'),
+    userPermissionMiddleware('moderator', 'moderator:partial'),
     tookPerformance('cmd:summary'),
     async ctx => {
       let authUser = ctx.session.authUser;
@@ -255,12 +256,12 @@ async function main(processes) {
 
   bot.command('today',
     authUserMiddleware,
-    userPermissionMiddleware('moderator'),
+    userPermissionMiddleware('moderator', 'moderator:partial'),
     tookPerformance('cmd:today'),
     async ctx => {
       let now = new Date();
       let authUser = ctx.session.authUser;
-      let availableWeekdays = constants.available_weekdays[authUser.role];
+      let availableWeekdays = UserAttrs[authUser.role].available_weekdays;
 
       if (availableWeekdays.includes(now.getDay())) {
         let data = await SummaryData.create({

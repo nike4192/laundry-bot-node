@@ -3,6 +3,7 @@ const constants = require('./constants.js');
 const locales = require('../locales');
 const { differenceInDays, isEqual, hoursToMilliseconds} = require('date-fns');
 const ms = require("ms");
+const { UserAttrs } = require("./constants");
 
 function getLocale(...args) {
   let l = locales.ru;
@@ -39,8 +40,8 @@ function getAvailableDates(userRole) {
     d += td;
   }
   let dates = [];
-  let availableDays = constants.available_days[userRole];
-  let availableWeekdays = constants.available_weekdays[userRole];
+  let availableWeekdays = UserAttrs[userRole].available_weekdays;
+  let availableDays = availableWeekdays.length;
   for (let i = 0; i < availableDays; i++) {
     while (!availableWeekdays.includes(new Date(d).getDay())) {
       d += td;
