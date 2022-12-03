@@ -28,7 +28,7 @@ function getAppointmentNote(actionName, data) {
   }
 }
 
-function getAvailableDates(userRole) {
+function getAvailableDates(availableWeekdays) {
   let now = new Date();
   let d = new Date(now).setHours(0, 0, 0, 0).valueOf();
   let td = ms('1d');
@@ -40,7 +40,6 @@ function getAvailableDates(userRole) {
     d += td;
   }
   let dates = [];
-  let availableWeekdays = UserAttrs[userRole].available_weekdays;
   let availableDays = availableWeekdays.length;
   for (let i = 0; i < availableDays; i++) {
     while (!availableWeekdays.includes(new Date(d).getDay())) {

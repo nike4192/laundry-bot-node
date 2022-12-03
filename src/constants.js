@@ -11,6 +11,8 @@ const UserRole = {
   employee: "employee"
 }
 
+const allWeekdays = [1, 2, 3, 4, 5, 6, 0]; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+
 const UserAttrs = {
   [UserRole.user]: {
     max_book_washers: 2,
@@ -22,11 +24,11 @@ const UserAttrs = {
   },
   [UserRole.moderator]: {
     max_book_washers: 3,
-    available_weekdays: [1, 2, 3, 4, 5, 6, 0], // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+    available_weekdays: allWeekdays
   },
   [UserRole.employee]: {
     max_book_washers: 3,
-    available_weekdays: [1, 2, 3, 4, 5, 6, 0], // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+    available_weekdays: allWeekdays
   }
 }
 
@@ -114,6 +116,7 @@ const WASHER_SIGN_CHARS = {  // not_available, available
 module.exports = {
   UserRole,
   UserAttrs,
+  allWeekdays,
   error_visible_duration,
   book_time_left,
   reminder_timedelta,

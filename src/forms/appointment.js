@@ -46,7 +46,8 @@ class DateAppointmentAction extends BaseAction {
   }
 
   async replyMarkup(user, data, state) {
-    let availableDates = misc.getAvailableDates(user.role);
+    let availableWeekdays = UserAttrs[user.role].available_weekdays;
+    let availableDates = misc.getAvailableDates(availableWeekdays);
 
     let keyboard = [];
     for (let date of availableDates) {

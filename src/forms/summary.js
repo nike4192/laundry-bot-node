@@ -5,6 +5,7 @@ const misc = require("../misc.js");
 const { Markup } = require("telegraf");
 const { BaseAction, BaseMessage, BaseForm } = require('./base.js');
 const { User, SummaryData, Appointment, AppointmentData } = require('../models.js');
+const { allWeekdays } = require("../constants");
 
 class SummaryDateAction extends BaseAction {
   constructor() {
@@ -16,7 +17,7 @@ class SummaryDateAction extends BaseAction {
   }
 
   async replyMarkup(user, data, state) {
-    let availableDates = misc.getAvailableDates(user.role);
+    let availableDates = misc.getAvailableDates(allWeekdays);
 
     let keyboard = [];
     for (let d of availableDates) {
