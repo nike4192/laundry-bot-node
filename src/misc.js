@@ -33,9 +33,8 @@ function getAvailableDates(availableWeekdays) {
   let d = new Date(now).setHours(0, 0, 0, 0).valueOf();
   let td = ms('1d');
 
-  let weekday = now.getDay();
-  let available_times = constants.available_weekday_times[weekday];
-  let isNotAvailableTimes = available_times.every(t => now.valueOf() > d + t);
+  let available_time_ranges = getAvailableTimeRanges(now);
+  let isNotAvailableTimes = available_time_ranges.every(r => now.valueOf() > d + r[0]);
   if (isNotAvailableTimes) {
     d += td;
   }
@@ -49,6 +48,25 @@ function getAvailableDates(availableWeekdays) {
     d += td;
   }
   return dates;
+}
+
+const changeDate = new Date(2022, 11, 26);
+
+function getAvailableTimeRanges(date) {
+  let weekday = date.getDay();
+  let roundedDate = new Date(date);
+  roundedDate.setHours(0, 0, 0, 0);
+  // Refactor after 26.12.22
+  if (roundedDate >= changeDate) {
+    return constants.new_available_weekday_time_ranges[weekday];
+  } else {
+    return constants.available_weekday_time_ranges[weekday];
+  }
+}
+
+function getAvailableTimeRange(datetime) {
+  let tr = getAvailableTimeRanges(datetime);
+  return tr.find(r => r[0] === time.toMS(datetime));
 }
 
 function dateToStr(date) {
@@ -136,6 +154,17 @@ const time = {
     let now = new Date();
     now.setHours(parseInt(h), parseInt(m), 0, 0);
     return now;
+  },
+  toMS(date) {
+    let h = date.getHours();
+    let m = date.getMinutes();
+    let s = date.getSeconds();
+    let milliseconds = date.getMilliseconds();
+    return (
+        h * 60 * 60 +
+        m * 60 +
+        s
+    ) * 1000 + milliseconds;
   }
 };
 
@@ -263,6 +292,8 @@ function expandSlots(at, user, appointments, d, times, washers) {
 module.exports = {
   aggregateAppointmentSlots,
   getAvailableDates,
+  getAvailableTimeRanges,
+  getAvailableTimeRange,
   getAppointmentNote,
   dateButtonToStr,
   AppointmentSlot,

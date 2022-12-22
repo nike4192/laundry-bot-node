@@ -40,29 +40,60 @@ const reminder_timedelta = [
   ms('1d')
 ]
 
-const user_available_times = [
-  ms('10h'),
-  ms('14h'),
-  ms('18h'),
-  ms('20h')
+const user_available_time_ranges = [
+  [ms('10h'), ms('12h')],
+  [ms('14h'), ms('16h')],
+  [ms('18h'), ms('20h')],
+  [ms('20h'), ms('22h')]
 ]
 
-const moderator_available_times = [
-  ms('10h'),
-  ms('13h'),
-  ms('16h'),
-  ms('19h'),
-  ms('22h')
+// AFTER 26.12.22 MOVE TO user_available_time_ranges
+const new_user_available_time_ranges = [
+  [
+      ms('12h'),
+      ms('13h') + ms('40min')
+  ],
+  [
+      ms('15h'),
+      ms('16h') + ms('40min')
+  ],
+  [
+      ms('18h'),
+      ms('19h') + ms('40min')
+  ],
+  [
+      ms('21h'),
+      ms('22h') + ms('40min')
+  ]
 ]
 
-const available_weekday_times = {
-  1: user_available_times,       // Monday
-  2: user_available_times,       // Tuesday
-  3: moderator_available_times,  // Wednesday
-  4: user_available_times,       // Thursday
-  5: user_available_times,       // Friday
-  6: user_available_times,       // Saturday
-  0: moderator_available_times   // Sunday
+const moderator_available_time_ranges = [
+  [ms('10h'), ms('12h')],
+  [ms('13h'), ms('15h')],
+  [ms('16h'), ms('18h')],
+  [ms('19h'), ms('21h')],
+  [ms('22h'), ms('24h')]
+]
+
+const available_weekday_time_ranges = {
+  1: user_available_time_ranges,       // Monday
+  2: user_available_time_ranges,       // Tuesday
+  3: moderator_available_time_ranges,  // Wednesday
+  4: user_available_time_ranges,       // Thursday
+  5: user_available_time_ranges,       // Friday
+  6: user_available_time_ranges,       // Saturday
+  0: moderator_available_time_ranges   // Sunday
+}
+
+// AFTER 26.12.22 MOVE TO available_weekday_time_ranges
+const new_available_weekday_time_ranges = {
+  1: new_user_available_time_ranges,   // Monday
+  2: new_user_available_time_ranges,   // Tuesday
+  3: moderator_available_time_ranges,  // Wednesday
+  4: new_user_available_time_ranges,   // Thursday
+  5: new_user_available_time_ranges,   // Friday
+  6: new_user_available_time_ranges,   // Saturday
+  0: moderator_available_time_ranges   // Sunday
 }
 
 const appointment_time_action_note = {
@@ -120,7 +151,8 @@ module.exports = {
   error_visible_duration,
   book_time_left,
   reminder_timedelta,
-  available_weekday_times,
+  available_weekday_time_ranges,
+  new_available_weekday_time_ranges,  // AFTER 26.12.22 MOVE TO available_weekday_time_ranges
   appointment_form_action_notes,
   SELF_ALREADY_AUTHORIZED,
   OTHER_ALREADY_AUTHORIZED,

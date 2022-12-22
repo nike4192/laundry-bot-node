@@ -10,7 +10,8 @@ const locales = require('../../locales/index.js');
 const { UserAttrs } = constants;
 const { expandSlots, getLocale, AppointmentSlot} = require("../misc");
 const { SummaryForm } = require('./summary.js');
-const { hoursToMilliseconds } = require("date-fns");
+const { hoursToMilliseconds, addMilliseconds} = require("date-fns");
+const ms = require("ms");
 
 
 class DateAppointmentAction extends BaseAction {
@@ -23,11 +24,11 @@ class DateAppointmentAction extends BaseAction {
 
   async isAvailableSlot(user, data, value) {
     let book_date = misc.date.parse(value);
-    let weekday = book_date.getDay();
-    let available_times = constants.available_weekday_times[weekday];
-    let times = available_times.map(t => {
+    let available_time_ranges = misc.getAvailableTimeRanges(book_date);
+    let times = available_time_ranges.map(r => {
+      let [from] = r;
       let d = new Date();
-      d.setHours(0, 0, 0, t);
+      d.setHours(0, 0, 0, from);
       return misc.time.stringify(d);
     });
 
@@ -108,12 +109,12 @@ class TimeAppointmentAction extends BaseAction {
     let now = new Date();
 
     let keyboard = [];
-    let weekday = data.book_date.getDay();
-    let available_times = constants.available_weekday_times[weekday];
-    for (let t of available_times) {
-      if (now.valueOf() < data.book_date.valueOf() + t) {
+    let available_time_ranges = misc.getAvailableTimeRanges(data.book_date);
+    for (let r of available_time_ranges) {
+      let [from] = r;
+      if (now.valueOf() < data.book_date.valueOf() + from) {
         let d = new Date();
-        d.setHours(0, 0, 0, t);
+        d.setHours(0, 0, 0, from);
         let slot = await this.isAvailableSlot(user, data, misc.time.stringify(d));
         let signChar = constants.WASHER_SIGN_CHARS[slot.reason][Number(slot.available)];
         let keyboardButton = Markup.button.callback(
@@ -144,11 +145,12 @@ class TimeAppointmentAction extends BaseAction {
   }
 
   itemStringify(data) {
-    let actionNote = misc.getAppointmentNote(this.actionName, data);
     let bookTime = misc.timeToStr(data.book_time);
-    return actionNote
-      ? misc.format('{} ({})', bookTime, actionNote(data))
-      : bookTime;
+    let availableTimeRanges = misc.getAvailableTimeRanges(data.book_date);
+    let [_, to] = availableTimeRanges.find(r => r[0] === misc.time.toMS(data.book_time));
+    let toTime = new Date();
+    toTime.setHours(0, 0, 0, to);
+    return misc.format('{} (забирать в {})', bookTime, misc.timeToStr(toTime));
   }
 }
 
