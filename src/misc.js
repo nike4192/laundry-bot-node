@@ -165,6 +165,11 @@ const time = {
         m * 60 +
         s
     ) * 1000 + milliseconds;
+  },
+  fromMS(milliseconds) {
+    let t = new Date();
+    t.setHours(0, 0, 0, milliseconds);
+    return t;
   }
 };
 
