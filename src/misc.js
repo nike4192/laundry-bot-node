@@ -1,9 +1,8 @@
 
 const constants = require('./constants.js');
 const locales = require('../locales');
-const { differenceInDays, isEqual, hoursToMilliseconds} = require('date-fns');
+const { differenceInDays, isEqual, hoursToMilliseconds, isSameDay} = require('date-fns');
 const ms = require("ms");
-const { UserAttrs } = require("./constants");
 
 function getLocale(...args) {
   let l = locales.ru;
@@ -41,7 +40,9 @@ function getAvailableDates(availableWeekdays) {
   let dates = [];
   let availableDays = availableWeekdays.length;
   for (let i = 0; i < availableDays; i++) {
-    while (!availableWeekdays.includes(new Date(d).getDay())) {
+    while (
+      !availableWeekdays.includes(new Date(d).getDay()) ||
+      constants.holidays.find(hd => isSameDay(hd, d))) {
       d += td;
     }
     dates.push(new Date(d));
@@ -56,17 +57,18 @@ function getAvailableTimeRanges(date) {
   let weekday = date.getDay();
   let roundedDate = new Date(date);
   roundedDate.setHours(0, 0, 0, 0);
-  // Refactor after 26.12.22
-  if (roundedDate >= changeDate) {
+
+  let partDayKey = Object
+    .keys(constants.part_day_time_ranges)
+    .find(k => isSameDay(new Date(k), roundedDate));
+  if (partDayKey) {
+    return constants.part_day_time_ranges[partDayKey];
+  } else if (roundedDate >= changeDate) {
+    // Refactor after 26.12.22
     return constants.new_available_weekday_time_ranges[weekday];
   } else {
     return constants.available_weekday_time_ranges[weekday];
   }
-}
-
-function getAvailableTimeRange(datetime) {
-  let tr = getAvailableTimeRanges(datetime);
-  return tr.find(r => r[0] === time.toMS(datetime));
 }
 
 function dateToStr(date) {
@@ -75,14 +77,11 @@ function dateToStr(date) {
   let deltaDays = differenceInDays(date, rd);
 
   let locale = getLocale();
-  let d = date.getDate();
-  let m = date.getMonth() + 1;
-  let y = date.getFullYear();
   let additionals = 0 <= deltaDays && deltaDays < locale['shift_days'].length
     ? locale['shift_days'][deltaDays]
     : locale['weekdays'][date.getDay()];
 
-  return `${d}.${m}.${y} (${additionals})`;
+  return `${date.toLocaleDateString('ru')} (${additionals})`;
 }
 
 function dateButtonToStr(date) {
@@ -298,7 +297,6 @@ module.exports = {
   aggregateAppointmentSlots,
   getAvailableDates,
   getAvailableTimeRanges,
-  getAvailableTimeRange,
   getAppointmentNote,
   dateButtonToStr,
   AppointmentSlot,

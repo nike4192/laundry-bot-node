@@ -1,5 +1,6 @@
 
 const ms = require('ms');
+const { createDaysProxy } = require("./helpers");
 
 const error_visible_duration = 2 // In seconds
 const book_time_left = 0.5 // In hours (I don't know how it is in English)
@@ -10,6 +11,31 @@ const UserRole = {
   moderator: "moderator",
   employee: "employee"
 }
+
+const holidays = createDaysProxy([
+  new Date(2022, 11, 31),
+  new Date(2023, 0, 1),
+  new Date(2023, 0, 2),
+]);
+
+const holiday_part_day_time_ranges = [
+  [
+    ms('12h'),
+    ms('13h') + ms('40min')
+  ],
+  [
+    ms('21h'),
+    ms('22h') + ms('40min')
+  ]
+]
+
+const part_day_time_ranges = createDaysProxy({
+  [new Date(2023, 0, 3)]: holiday_part_day_time_ranges,
+  [new Date(2023, 0, 4)]: holiday_part_day_time_ranges,
+  [new Date(2023, 0, 5)]: holiday_part_day_time_ranges,
+  [new Date(2023, 0, 6)]: holiday_part_day_time_ranges,
+  [new Date(2023, 0, 7)]: holiday_part_day_time_ranges,
+});
 
 const allWeekdays = [1, 2, 3, 4, 5, 6, 0]; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
 
@@ -147,6 +173,8 @@ const WASHER_SIGN_CHARS = {  // not_available, available
 module.exports = {
   UserRole,
   UserAttrs,
+  holidays,
+  part_day_time_ranges,
   allWeekdays,
   error_visible_duration,
   book_time_left,
